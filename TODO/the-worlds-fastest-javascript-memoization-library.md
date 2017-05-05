@@ -11,14 +11,14 @@
 
 **在本文中，我将介绍如何实现 [fast-memoize.js][fast-memoize.js](https://github.com/caiogondim/fast-memoize.js)，它是世界上最快的 JavaScript 记忆化（memoization）实现，每秒能进行5000万次操作。
 We’re going to discuss all the steps and decisions I took in a detailed way, and I’ll also show you the code and benchmarks as proof.
-
+下面我们就来详细讨论实现的步骤和决策，并且给出代码实现和性能测试作为证明。
 As **fast-memoize.js** is an open source project, I’ll be delighted to read your comments and suggestions for this library!
-**fast-memoize.js** 是开源项目，所以欢迎大家给我留言和建议。
+**fast-memoize.js** 是开源项目，欢迎大家给我留言和建议。
 
 A while ago I was playing around with some [soon to be released features](http://www.2ality.com/2015/06/tail-call-optimization.html) in V8 using the Fibonacci algorithm as a basis for a benchmark. 
-
+不久以前，我尝试了一下V8中一些[即将发布的特性](http://www.2ality.com/2015/06/tail-call-optimization.html)，以斐波那契算法为基础做了一些基准测试。
 One of the benchmarks consisted a memoized version of the Fibonacci algorithm against a vanilla implementation, and the results showed a huge gap in performance between them.
-基准中包含了一个斐波那契算法的记忆化版本和普通实现的比较，实验结果表明记忆化版本有着巨大的性能优势。
+基准测试之一就是斐波那契算法的记忆化版本和普通实现的比较，实验结果表明记忆化版本有着巨大的性能优势。
 After realizing this, I started poking around with different memoization libraries and benchmarking them (because... why not?). I was quite surprised to see a huge performance gap between them, since the memoization algorithm is quite straightforward. 
 认识到这一点，我又翻阅了不同的记忆化库的实现，并对它们进行性能上的比较（因为。。。为什么不呢？）。记忆化本身的算法非常简单，然而我震惊的发现不同实现性能差别巨大。
 But why?
@@ -29,7 +29,7 @@ But why?
 ![常见JavaScript记忆化库的性能](https://blog-assets.risingstack.com/2017/01/performance-of-popular-javascript-memoization-libraries.png)
 
 While taking a look at the [lodash](https://github.com/lodash/lodash/blob/master/memoize.js#L50) and [underscore](https://github.com/jashkenas/underscore/blob/master/underscore.js#L810) source code, I also realized that by default, they only could memoize functions that accept one argument (arity one). I was — again — curious, and wondering if I could make a fast enough memoization library that would accept N arguments. 
-在翻阅 [lodash](https://github.com/lodash/lodash/blob/master/memoize.js#L50) 和 [underscore](https://github.com/jashkenas/underscore/blob/master/underscore.js#L810) 的源码时，我发现默认情况下，它们只能记忆一个参数的函数。于是，我很好奇，我能否实现一个足够快并且接受多个参数的版本呢？
+在翻阅 [lodash](https://github.com/lodash/lodash/blob/master/memoize.js#L50) 和 [underscore](https://github.com/jashkenas/underscore/blob/master/underscore.js#L810) 的源码时，我发现默认情况下，它们只能记忆一个参数的函数。于是，我很好奇，能否实现一个足够快并且接受多个参数的版本呢？
 *(And, maybe, creating one more npm package in the world?)*
 
 Below I explain all the steps and decisions I took while creating the [fast-memoize.js](https://github.com/caiogondim/fast-memoize.js) library.
