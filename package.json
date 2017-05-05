@@ -1,0 +1,31 @@
+{
+  "name": "gold-miner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "markdownlint --config ./.markdownlint.json *.md ./TODO/**/*.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aladdin-ADD/gold-miner.git"
+  },
+  "keywords": [
+    "android",
+    "translation",
+    "ios",
+    "frontend",
+    "react",
+    "tutorials"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Aladdin-ADD/gold-miner/issues"
+  },
+  "homepage": "https://github.com/Aladdin-ADD/gold-miner#readme",
+  "devDependencies": {
+    "markdownlint": "^0.4.1",
+    "markdownlint-cli": "^0.3.1"
+  }
+}
