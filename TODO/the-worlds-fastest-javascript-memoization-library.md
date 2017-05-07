@@ -4,7 +4,7 @@
 > * 译者：[薛定谔的猫](https://github.com/Aladdin-ADD)
 > * 校对者：
 
-# 我是如何实现世界上最快的 JavaScript 记忆化（memoization）的 #
+# 我是如何实现世界上最快的 JavaScript 记忆化的 #
 
 
 **在本文中，我将详细介绍如何实现 [fast-memoize.js](https://github.com/caiogondim/fast-memoize.js)，它是世界上最快的 JavaScript 记忆化（memoization）实现，每秒能进行5000万次操作。**
@@ -15,7 +15,7 @@
 不久前，我尝试了V8中一些[即将发布的特性](http://www.2ality.com/2015/06/tail-call-optimization.html)，以斐波那契算法为基础做了一些基准测试实验。
 实验之一就是比较斐波那契算法的记忆化版本和普通实现，结果表明记忆化版本有着巨大的性能优势。
 
-意识到这一点，我又翻阅了不同的记忆化库的实现，并比较了它们的性能（因为……呃，为什么不呢？）。记忆化本身的算法非常简单，然而我震惊的发现不同实现之间性能差异巨大。
+意识到这一点，我又翻阅了不同的记忆化库的实现，并比较了它们的性能（因为……呃，为什么不呢？）。记忆化算法本身非常简单，然而我震惊的发现不同实现之间性能差异巨大。
 这是什么原因呢？
 
 ![常见JavaScript记忆化库的性能](https://blog-assets.risingstack.com/2017/01/performance-of-popular-javascript-memoization-libraries.png)
@@ -116,7 +116,7 @@ I tried to use `JSON.stringify` and a bound `JSON.stringify` hoping there would 
 策略使用了**序列化器**和**缓存**，将两者结合起来。对 [fast-memoize.js](https://github.com/caiogondim/fast-memoize.js) 来说，策略是我花时间最多的部分。即使非常简单的算法，??
 以下是我先后尝试的方式：
 
-1. 普通方式 (第一次尝试) 
+1. 普通方式 (初始版本) 
 2. 针对单个参数优化
 3. 参数推断
 4. 偏特化
@@ -154,7 +154,7 @@ I tried to use `JSON.stringify` and a bound `JSON.stringify` hoping there would 
 
 #### 参数推断 ####
 
-对已定义的函数，`function.length` 返回期望接受的参数个数。我们可以通过给策略 monadic（单参数函数）和 not-monadic，这样就避免了 `arguments.length === 1` 的检查。
+对已定义的函数，`function.length` 返回期望接受的参数个数。我们可以通过给策略 monadic（单参数函数）和 not-monadic，这样就避免了检查 `arguments.length === 1`。
 
 ```js
     functionfoo(a, b) {  
@@ -163,7 +163,7 @@ I tried to use `JSON.stringify` and a bound `JSON.stringify` hoping there would 
     foo.length // => 2  
 ```    
 
-![infer arity](https://blog-assets.risingstack.com/2017/01/infer-arity.png)
+![参数推断](https://blog-assets.risingstack.com/2017/01/infer-arity.png)
 
 省去了这一次条件判断，我们（的实现）性能又有了一点提升，可以达到**每秒6,000,000次操作**。
 
@@ -253,8 +253,7 @@ If you liked the library, please give it a [star](https://github.com/caiogondim/
 - [Big-O cheat sheet](http://bigocheatsheet.com/)
 - [GOTO 2015 • Benchmarking JavaScript • Vyacheslav Egorov](https://www.youtube.com/watch?v=g0ek4vV7nEA&amp;t=22s)
 
-Let me know in the comments if you have any questions!
-
+有任何问题，欢迎评论！
 
 ---
 
