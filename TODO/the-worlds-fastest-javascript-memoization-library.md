@@ -216,33 +216,29 @@ Legend:
 
 [fast-memoize.js](https://github.com/caiogondim/fast-memoize.js)是最快的，几乎是第二名的3倍，**每秒27,000,000次操作**。
 
-### Future proof ###
+### 面向未来 ###
 
-V8 has a new and yet to be officially released new optimization compiler called [TurboFan](http://v8project.blogspot.com.br/2015/07/digging-into-turbofan-jit.html).
+V8有一个很新的、未发布的优化编译器[TurboFan](http://v8project.blogspot.com.br/2015/07/digging-into-turbofan-jit.html)。
+我们现在就应该用它测试一下，因为TurboFan（极有可能）很快就会添加到V8中。通过给 Node.js 设置 flag `--turbo-fan` 就可以启用它。本地执行，请运行命令`npm run benchmark:turbo-fan`。以下是启用后的测试结果：
 
-We should try it today to see how our code will behave tomorrow since TurboFan will be (very 
+![使用 TurboFan 的性能](https://blog-assets.risingstack.com/2017/01/performance-with-turbofan.png)
 
-likely) added to V8 shortly. To enable it pass the flag `--turbo-fan` to the Node.js binary. To run locally, do `npm run benchmark:turbo-fan`. Below the benchmark with TurboFan enabled:
+性能几乎翻倍，现在达到接近**每秒 50,000,000 次**。
 
-![Performance with TurboFan](https://blog-assets.risingstack.com/2017/01/performance-with-turbofan.png)
+似乎最新的TurboFan编译器可以极大的优化我们最终的 [fast-memoize.js](https://github.com/caiogondim/fast-memoize.js) 版本。
 
-Almost a double gain in performance. We are now running at almost **50 million operations per second**. 
-
-Seems the new [fast-memoize.js](https://github.com/caiogondim/fast-memoize.js) version can be highly optimized with the soon to be released new compiler.
-
-## Conclusion ##
+## 结论 ##
 
 That was my take on creating a faster library on an already crowded market. Creating many solutions for each part, combining them, and letting the computer tell which one was the fastest based on statistically significant data. *(I used [benchmark.js](https://benchmarkjs.com/) for that).*
-
-Hope the process I used can be useful for someone else too.
-
+以上就是我创建这个世界上最快的记忆化库的过程。分别实现各个部分，组合它们，然后统计每种组合方案的性能数据，从中选择最优的方案。*(使用 [benchmark.js](https://benchmarkjs.com/) )。*
+希望这个过程对其他开发者有所帮助。
 [fast-memoize.js is currently the best memoization library in #JavaScript, and I will strive for it to always be.](https://twitter.com/share)
+[fast-memoize.js 是目前最好的 #JavaScrip 库, 并且我会努力让它一直是最好的。](https://twitter.com/share)
+[分享到 Tweet](https://twitter.com/share)
 
-[Click To Tweet](https://twitter.com/share)
+**并非是因为我聪明绝顶, 而是我会一直维护它。**欢迎给我提交 [Pull requests](https://github.com/caiogondim/fast-memoize.js/pulls)。
 
-**Not because I'm the smartest programmer in the world, but because I will keep the algorithm up to date with findings from others.**[Pull requests](https://github.com/caiogondim/fast-memoize.js/pulls) are always welcome.
-
-Benchmarking algorithms that runs on virtual machines can be very tricky, as explained by [Vyacheslav Egorov](https://www.youtube.com/watch?v=g0ek4vV7nEA&amp;t=22s), a former V8 engineer. If you see something wrong on how the tests were set up, please create an issue on [GitHub](https://github.com/caiogondim/fast-memoize.js/issues).
+正如前V8工程师 [Vyacheslav Egorov](https://www.youtube.com/watch?v=g0ek4vV7nEA&amp;t=22s) 所言，在虚拟机上测试算法性能非常棘手。如果你发现测试中的错误，请在 [GitHub](https://github.com/caiogondim/fast-memoize.js/issues) 上提交 issue。
 
 The same goes for the library itself. Create an issue if you spotted anything wrong (issues with a failing test are appreciated). 
 
