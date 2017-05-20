@@ -1,31 +1,33 @@
 > * 原文地址：[Understanding Node.js Event-Driven Architecture](https://medium.freecodecamp.com/understanding-node-js-event-driven-architecture-223292fcbc2d)
 > * 原文作者：[Samer Buna](https://medium.freecodecamp.com/@samerbuna)
 > * 译文出自：[掘金翻译计划](https://github.com/xitu/gold-miner)
-> * 译者：
+> * 译者：[薛定谔的猫]((https://github.com/Aladdin-ADD)
 > * 校对者：
 
 # Understanding Node.js Event-Driven Architecture #
+# 理解 Node.js 事件驱动
 
 ![](https://cdn-images-1.medium.com/max/2000/1*Nozl2qd0SV8Uya2CEkF_mg.jpeg)
 
 Most of Node’s objects — like HTTP requests, responses, and streams — implement the `EventEmitter` module so they can provide a way to emit and listen to events.
-
+大多数 Nodejs 对象 -- 比如说 HTTP requests、responses、stream -- 都实现了 `EventEmitter` 模块，因此它们能够提供发出（emit）和 监听（listen）事件。
 ![](https://cdn-images-1.medium.com/max/800/1*74K5OhiYt7WTR0WuVGeNLQ.png)
 
 The simplest form of the event-driven nature is the callback style of some of the popular Node.js functions — for example, `fs.readFile`. In this analogy, the event will be fired once (when Node is ready to call the callback) and the callback acts as the event handler.
-
+事件驱动的最简单的形式就是回调函数。正如 `fs.readFile` 那样，当 Node 要调用回调函数时，会触发一个事件，回调函数就作为一个事件处理器。
 Let’s explore this basic form first.
-
+下面我们先来看一下这种简单的情况。
 #### Call me when you’re ready, Node! ####
+#### 回调函数 ####
 
 The original way Node handled asynchronous events was with callback. This was a long time ago, before JavaScript had native promises support and the async/await feature.
-
+回调函数是最原始的异步事件处理机制。在 JavaScript 原生支持 promise 和 async/await 之前就存在了很久。
 Callbacks are basically just functions that you pass to other functions. This is possible in JavaScript because functions are first class objects.
-
+回调函数就是将函数作为参数传递给其它函数。这样做是可行的，因为在 JavaScript 中函数是一等公民。
 It’s important to understand that callbacks do not indicate an asynchronous call in the code. A function can call the callback both synchronously and asynchronously.
-
+需要理解的很重要的一点：回调函数并不一定是异步的。可以以同步/异步的方式调用回调函数。
 For example, here’s a host function `fileSize` that accepts a callback function `cb` and can invoke that callback function both synchronously and asynchronously based on a condition:
-
+举例来说，下面的代码中 `fileSize` 函数可以接受一个回调函数 `cb` 作为参数，根据条件可以执行同步/异步方式调用。
 ```
 function fileSize (fileName, cb) {
   if (typeof fileName !== 'string') {
@@ -41,9 +43,10 @@ function fileSize (fileName, cb) {
 ```
 
 Note that this is a bad practice that leads to unexpected errors. Design host functions to consume callback either always synchronously or always asynchronously.
+请注意：这并不是一个好的实践，它会导致预期外的错误。推荐设计 host functions 总是使用同步，或者异步的方式。
 
 Let’s explore a simple example of a typical asynchronous Node function that’s written with a callback style:
-
+我们来以回调方式写一个典型的异步函数的例子吧！
 ```
 const readFileAsArray = function(file, cb) {
   fs.readFile(file, function(err, data) {
@@ -58,9 +61,9 @@ const readFileAsArray = function(file, cb) {
 ```
 
 `readFileAsArray` takes a file path and a callback function. It reads the file content, splits it into an array of lines, and calls the callback function with that array.
-
+`readFileAsArray` 接受一个文件路径和回调作为参数。它读取文件内容，分隔为行的数组，对这个数组调用回调函数。
 Here’s an example use for it. Assuming that we have the file `numbers.txt` in the same directory with content like this:
-
+下面是调用它的例子。假设我们在同目录下有一个名为 `numbers.txt` 的文件，内容如下：
 ```
 10
 11
@@ -71,6 +74,7 @@ Here’s an example use for it. Assuming that we have the file `numbers.txt` in 
 ```
 
 If we have a task to count the odd numbers in that file, we can use `readFileAsArray` to simplify the code:
+如果我们要统计这个文件中奇数的个数，可以使用 `readFileAsArray` 来简化代码：
 
 ```
 readFileAsArray('./numbers.txt', (err, lines) => {
@@ -83,15 +87,16 @@ readFileAsArray('./numbers.txt', (err, lines) => {
 ```
 
 The code reads the numbers content into an array of strings, parses them as numbers, and counts the odd ones.
+这段代码将数字内容读取到一个字符串数组中，转化为数字，然后统计奇数的个数。
 
 Node’s callback style is used purely here. The callback has an error-first argument `err` that’s nullable and we pass the callback as the last argument for the host function. You should always do that in your functions because users will probably assume that. Make the host function receive the callback as its last argument and make the callback expect an error object as its first argument.
-
+这里仅仅使用了Node的回调方式。回调函数的第一个参数`err`表示错误（可以为null），第二个参数为回调函数。你应当遵守这一约定，因为使用者很可能有这样的假定。确保host function最后一个参数为回调函数，该函数的第一个参数为错误对象。
 #### The modern JavaScript alternative to Callbacks ####
-
+#### 现代JavaScript方式 ####
 In modern JavaScript, we have promise objects. Promises can be an alternative to callbacks for asynchronous APIs. Instead of passing a callback as an argument and handling the error in the same place, a promise object allows us to handle success and error cases separately and it also allows us to chain multiple asynchronous calls instead of nesting them.
-
+在现代JavaScript程序中，我们可以使用promise对象。Promise可以取代回调来处理异步API。相比回调函数将错误对象作为第一个参数，promise可以让我们分别处理成功和失败的情况，并且允许我们链式处理异步调用，而不是像回调一样嵌套。
 If the `readFileAsArray` function supports promises, we can use it as follows:
-
+如果`readFileAsArray`支持promise，我们就可以这样调用：
 ```
 readFileAsArray('./numbers.txt')
   .then(lines => {
@@ -103,9 +108,10 @@ readFileAsArray('./numbers.txt')
 ```
 
 Instead of passing in a callback function, we called a `.then` function on the return value of the host function. This `.then` function usually gives us access to the same lines array that we get in the callback version, and we can do our processing on it as before. To handle errors, we add a `.catch` call on the result and that gives us access to an error when it happens.
+不再需要传递一个回调函数，我们对host function 的返回值调用了一个`.then`函数。这个函数的参数就是上面回调方式中的行数组，剩下的操作和之前一样。要处理错误情况，我们可以调用`.catch`，当有错误发生时，它可以接收到错误对象。
 
 Making the host function support a promise interface is easier in modern JavaScript thanks to the new Promise object. Here’s the `readFileAsArray` function modified to support a promise interface in addition to the callback interface it already supports:
-
+在现代JavaScript中有了promise对象，我们可以很容易的让它支持promise接口。
 ```
 const readFileAsArray = function(file, cb = () => {}) {
   return new Promise((resolve, reject) => {
@@ -124,13 +130,13 @@ const readFileAsArray = function(file, cb = () => {}) {
 ```
 
 So we make the function return a Promise object, which wraps the `fs.readFile` async call. The promise object exposes two arguments, a `resolve` function and a `reject` function.
-
+所以我们确保函数返回一个包裹了`fs.readFile`调用的promise对象，它暴露了2个参数：`reslove` 和 `reject` 函数。
 Whenever we want to invoke the callback with an error we use the promise `reject` function as well, and whenever we want to invoke the callback with data we use the promise `resolve` function as well.
-
+无论何时，想调用错误情况的回调，调用promise对象的 `reject` 函数；当调用执行成功的回调，使用promise的`reslove`函数。
 The only other thing we needed to do in this case is to have a default value for this callback argument in case the code is being used with the promise interface. We can use a simple, default empty function in the argument for that case: `() => {}`.
-
+我们需要做的另外一件事情是：给传入的回调函数参数一个默认值。在这个例子中，我们简单的给一个默认的空函数：`() => {}`。
 #### Consuming promises with async/await ####
-
+#### async/await ####
 Adding a promise interface makes your code a lot easier to work with when there is a need to loop over an async function. With callbacks, things become messy.
 
 Promises improve that a little bit, and function generators improve on that a little bit more. This said, a more recent alternative to working with async code is to use the `async` function, which allows us to treat async code as if it was synchronous, making it a lot more readable overall.
